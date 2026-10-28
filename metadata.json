@@ -1,0 +1,6 @@
+{
+  "name": "Harmoniq — Sé la banda",
+  "description": "Plataforma interactiva para aprender y tocar canciones con aislamiento de pistas por IA, acordes adaptativos y feedback de audio en tiempo real.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Harmoniq — Sé la banda</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090B;
+    --panel: #18181B;
+    --cyan: #22D3EE;
+    --purple: #A855F7;
+  }
+  * { font-family: 'Inter', sans-serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  body { background: var(--bg); color: #fff; overflow-x: hidden; }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #22D3EE 0%, #A855F7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gradient-bg {
+    background: linear-gradient(135deg, #22D3EE 0%, #A855F7 100%);
+  }
+  .gradient-border {
+    position: relative;
+    background: #18181B;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(34,211,238,0.5), rgba(168,85,247,0.5));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .glass {
+    background: rgba(24, 24, 27, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .glow-purple {
+    box-shadow: 0 0 80px 20px rgba(168, 85, 247, 0.3);
+  }
+  .glow-cyan {
+    box-shadow: 0 0 60px 15px rgba(34, 211, 238, 0.4);
+  }
+  .glow-green {
+    box-shadow: 0 0 40px 10px rgba(34, 197, 94, 0.5);
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+  }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  
+  @keyframes pulse-ring {
+    0% { transform: scale(0.95); opacity: 1; }
+    100% { transform: scale(1.3); opacity: 0; }
+  }
+  .pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  
+  @keyframes chord-enter {
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .chord-animate { animation: chord-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.3); }
+    50% { transform: scaleY(1); }
+  }
+  .wave-bar {
+    animation: wave 1s ease-in-out infinite;
+    transform-origin: center;
+  }
+  
+  /* Slider personalizado */
+  input[type=range] {
+    -webkit-appearance: none;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 6px;
+    background: linear-gradient(90deg, #22D3EE, #A855F7);
+    border-radius: 3px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: white;
+    margin-top: -6px;
+    box-shadow: 0 0 10px rgba(168,85,247,0.8);
+    cursor: pointer;
+  }
+  input[type=range].vertical {
+    writing-mode: bt-lr;
+    -webkit-appearance: slider-vertical;
+    width: 6px;
+    height: 120px;
+    padding: 0;
+  }
+  input[type=range].vertical::-webkit-slider-runnable-track {
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, #A855F7, #22D3EE);
+  }
+  input[type=range].vertical::-webkit-slider-thumb {
+    margin-left: -6px;
+  }
+  
+  .hidden-view { display: none; }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #09090B; }
+  ::-webkit-scrollbar-thumb { background: #27272A; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3F3F46; }
+  
+  .hero-bg {
+    background: radial-gradient(ellipse at top, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(34, 211, 238, 0.1) 0%, transparent 50%);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING PAGE ============ -->
+<div id="landing" class="min-h-screen">
+  
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 gradient-bg rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </div>
+        <span class="text-xl font-bold">Harmoniq</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+        <a href="#" class="hover:text-white transition">Funciones</a>
+        <a href="#" class="hover:text-white transition">Precios</a>
+        <a href="#" class="hover:text-white transition">Comunidad</a>
+        <a href="#" class="hover:text-white transition">Blog</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="text-sm text-gray-300 hover:text-white transition hidden sm:block">Iniciar sesión</button>
+        <button onclick="showPlayer()" class="gradient-bg text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition shadow-lg shadow-purple-500/30">Probar gratis</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero-bg pt-32 pb-20 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-gray-300 mb-6">
+        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        Potenciado por IA · 4.8★ de 75K+ músicos
+      </div>
+      <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">
+        No solo toques la canción.<br/>
+        <span class="gradient-text">Sé la banda.</span>
+      </h1>
+      <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+        La primera plataforma que aísla los instrumentos, adapta los acordes a tu nivel y te escucha tocar en tiempo real con IA.
+      </p>
+      
+      <!-- Buscador -->
+      <div class="max-w-2xl mx-auto mb-12">
+        <div class="glass rounded-2xl p-2 flex items-center gap-2">
+          <svg class="w-5 h-5 text-gray-400 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="searchInput" type="text" placeholder="Pega un link de YouTube o busca una canción..." class="flex-1 bg-transparent outline-none text-white placeholder-gray-500 py-3 px-2"/>
+          <button onclick="showPlayer()" class="gradient-bg text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition">Buscar</button>
+        </div>
+        <div class="flex flex-wrap justify-center gap-2 mt-4 text-xs text-gray-500">
+          <span>Prueba con:</span>
+          <button onclick="showPlayer()" class="hover:text-cyan-400 transition">Hotel California</button>
+          <span>·</span>
+          <button onclick="showPlayer()" class="hover:text-cyan-400 transition">Zombie</button>
+          <span>·</span>
+          <button onclick="showPlayer()" class="hover:text-cyan-400 transition">Wonderwall</button>
+          <span>·</span>
+          <button onclick="showPlayer()" class="hover:text-cyan-400 transition">Creep</button>
+        </div>
+      </div>
+
+      <!-- Mockup flotante -->
+      <div class="relative animate-float">
+        <div class="absolute inset-0 gradient-bg opacity-30 blur-3xl rounded-full"></div>
+        <div class="relative glass rounded-3xl p-6 max-w-3xl mx-auto">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="ml-3 text-xs text-gray-500">harmoniq.app/player</span>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="col-span-2 bg-black/40 rounded-xl aspect-video flex items-center justify-center">
+              <svg class="w-16 h-16 text-white/50" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="space-y-2">
+              <div class="h-20 gradient-border rounded-xl p-3">
+                <div class="text-3xl font-bold gradient-text text-center">Bm</div>
+              </div>
+              <div class="h-20 bg-white/5 rounded-xl p-3 opacity-50">
+                <div class="text-2xl font-bold text-gray-400 text-center">G</div>
+              </div>
+              <div class="h-20 bg-white/5 rounded-xl p-3 opacity-30">
+                <div class="text-2xl font-bold text-gray-500 text-center">D</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">Superpoderes para músicos</h2>
+      <p class="text-gray-400 text-center mb-16 max-w-2xl mx-auto">Todo lo que necesitas para aprender, practicar y tocar como un profesional.</p>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="glass rounded-2xl p-8 hover:bg-white/5 transition group">
+          <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Dificultad Adaptativa</h3>
+          <p class="text-gray-400 text-sm">¿Acordes difíciles? Desliza y nuestra IA los simplifica al instante sin cambiar el tono original.</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-8 hover:bg-white/5 transition group">
+          <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Aislamiento de Pistas</h3>
+          <p class="text-gray-400 text-sm">Silencia la guitarra original y toca tú esa parte. Escucha la voz y la batería como nunca antes.</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-8 hover:bg-white/5 transition group">
+          <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Feedback en Tiempo Real</h3>
+          <p class="text-gray-400 text-sm">Activa tu micro. Te diremos si estás a tiempo y en el acorde correcto con indicadores visuales.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center glass rounded-3xl p-12 relative overflow-hidden">
+      <div class="absolute inset-0 gradient-bg opacity-10"></div>
+      <div class="relative">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4">¿Listo para tocar?</h2>
+        <p class="text-gray-400 mb-8">Únete a más de 75,000 músicos que ya están mejorando con Harmoniq.</p>
+        <button onclick="showPlayer()" class="gradient-bg text-white font-bold px-8 py-4 rounded-xl hover:opacity-90 transition shadow-xl shadow-purple-500/40 text-lg">
+          Empezar ahora — Es gratis
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-white/5 py-8 px-6 text-center text-sm text-gray-500">
+    Hecho con ❤️ para músicos · © 2026 Harmoniq
+  </footer>
+</div>
+
+<!-- ============ PLAYER PAGE ============ -->
+<div id="player" class="hidden-view min-h-screen bg-[#09090B]">
+  
+  <!-- Top Bar -->
+  <div class="glass sticky top-0 z-40 border-b border-white/5">
+    <div class="px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button onclick="showLanding()" class="text-gray-400 hover:text-white transition flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          <span class="hidden sm:inline">Volver</span>
+        </button>
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-sm md:text-base">Hotel California</h1>
+          <p class="text-xs text-gray-500">Eagles · 1977</p>
+        </div>
+      </div>
+      
+      <div class="hidden md:flex items-center gap-6 text-xs font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">TONO</span>
+          <span id="keyDisplay" class="gradient-text font-bold">Bm</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">BPM</span>
+          <span class="text-white font-bold">74</span>
+          <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">CAPO</span>
+          <span id="capoDisplay" class="text-white font-bold">0</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <button onclick="toggleFocus()" class="p-2 hover:bg-white/5 rounded-lg transition" title="Modo foco">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        </button>
+        <button class="p-2 hover:bg-white/5 rounded-lg transition">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </button>
+        <button class="p-2 hover:bg-white/5 rounded-lg transition">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div id="mainGrid" class="grid lg:grid-cols-[1fr_360px] gap-0 min-h-[calc(100vh-140px)]">
+    
+    <!-- LEFT: Video + Chords -->
+    <div class="p-6 space-y-6">
+      
+      <!-- Video -->
+      <div class="glass rounded-2xl overflow-hidden">
+        <div class="aspect-video bg-black relative">
+          <iframe id="ytPlayer" class="w-full h-full" src="https://www.youtube.com/embed/BciZRPFYp70?enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- Chord Display Principal -->
+      <div class="glass rounded-3xl p-8 relative overflow-hidden">
+        <div id="chordGlow" class="absolute inset-0 gradient-bg opacity-10 blur-3xl transition-opacity"></div>
+        
+        <div class="relative grid grid-cols-[1fr_auto] gap-8 items-center">
+          
+          <!-- Acorde actual -->
+          <div class="text-center">
+            <div class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-3">Toca ahora</div>
+            <div id="currentChord" class="text-8xl md:text-9xl font-black gradient-text chord-animate">Bm</div>
+            <div id="chordFeedback" class="mt-4 flex items-center justify-center gap-2 text-sm">
+              <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+              <span class="text-gray-500">Esperando tu instrumento...</span>
+            </div>
+          </div>
+
+          <!-- Diagrama de acorde -->
+          <div class="hidden md:block">
+            <div class="relative w-48 h-56">
+              <!-- Cejilla -->
+              <div class="absolute top-0 left-0 right-0 h-1 bg-white"></div>
+              <!-- Trastes -->
+              <div class="absolute inset-0 flex flex-col justify-between pt-1">
+                <div class="w-full h-px bg-white/30"></div>
+                <div class="w-full h-px bg-white/30"></div>
+                <div class="w-full h-px bg-white/30"></div>
+                <div class="w-full h-px bg-white/30"></div>
+                <div class="w-full h-px bg-white/30"></div>
+              </div>
+              <!-- Cuerdas -->
+              <div class="absolute inset-0 flex justify-between px-2">
+                <div class="w-px h-full bg-white/40"></div>
+                <div class="w-px h-full bg-white/40"></div>
+                <div class="w-px h-full bg-white/40"></div>
+                <div class="w-px h-full bg-white/40"></div>
+                <div class="w-px h-full bg-white/40"></div>
+                <div class="w-px h-full bg-white/40"></div>
+              </div>
+              <!-- Dedos (simulados para Bm) -->
+              <div id="chordDots" class="absolute inset-0">
+                <div class="absolute top-[10%] left-[16%] w-7 h-7 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white shadow-lg">1</div>
+                <div class="absolute top-[30%] left-[33%] w-7 h-7 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white shadow-lg">2</div>
+                <div class="absolute top-[30%] left-[50%] w-7 h-7 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white shadow-lg">3</div>
+                <div class="absolute top-[30%] left-[66%] w-7 h-7 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white shadow-lg">4</div>
+                <div class="absolute top-[30%] left-[83%] w-7 h-7 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white shadow-lg">4</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Próximos acordes -->
+        <div class="mt-8 pt-6 border-t border-white/5">
+          <div class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-3">Próximos</div>
+          <div class="flex gap-3">
+            <div class="flex-1 glass rounded-xl p-4 text-center border-cyan-500/30 border">
+              <div class="text-2xl font-bold text-cyan-400">G</div>
+              <div class="text-xs text-gray-500 mt-1">en 4s</div>
+            </div>
+            <div class="flex-1 glass rounded-xl p-4 text-center opacity-60">
+              <div class="text-2xl font-bold text-gray-300">D</div>
+              <div class="text-xs text-gray-500 mt-1">en 8s</div>
+            </div>
+            <div class="flex-1 glass rounded-xl p-4 text-center opacity-40">
+              <div class="text-2xl font-bold text-gray-400">F#7</div>
+              <div class="text-xs text-gray-500 mt-1">en 12s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="glass rounded-2xl p-4">
+        <div class="flex items-center gap-4">
+          <span id="currentTime" class="text-xs font-mono text-gray-400 w-10">0:00</span>
+          <div class="flex-1 h-2 bg-white/10 rounded-full overflow-hidden relative">
+            <div id="progressBar" class="h-full gradient-bg rounded-full transition-all" style="width: 0%"></div>
+            <!-- Marcas de acordes -->
+            <div class="absolute top-0 left-[10%] w-0.5 h-full bg-white/30"></div>
+            <div class="absolute top-0 left-[25%] w-0.5 h-full bg-white/30"></div>
+            <div class="absolute top-0 left-[45%] w-0.5 h-full bg-white/30"></div>
+            <div class="absolute top-0 left-[65%] w-0.5 h-full bg-white/30"></div>
+            <div class="absolute top-0 left-[85%] w-0.5 h-full bg-white/30"></div>
+          </div>
+          <span class="text-xs font-mono text-gray-400 w-10 text-right">6:30</span>
+        </div>
+        
+        <!-- Controles -->
+        <div class="flex items-center justify-center gap-4 mt-4">
+          <button class="p-2 hover:bg-white/5 rounded-lg transition">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
+          </button>
+          <button onclick="togglePlay()" class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center hover:scale-105 transition shadow-lg shadow-purple-500/40">
+            <svg id="playIcon" class="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="p-2 hover:bg-white/5 rounded-lg transition">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"/></svg>
+          </button>
+        </div>
+        
+        <!-- Velocidad -->
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <span class="text-xs text-gray-500">Velocidad:</span>
+          <button onclick="setSpeed(0.5)" class="speed-btn px-2 py-1 text-xs rounded hover:bg-white/10 transition">0.5x</button>
+          <button onclick="setSpeed(0.75)" class="speed-btn px-2 py-1 text-xs rounded hover:bg-white/10 transition">0.75x</button>
+          <button onclick="setSpeed(1)" class="speed-btn px-3 py-1 text-xs rounded gradient-bg font-bold">1.0x</button>
+          <button onclick="setSpeed(1.25)" class="speed-btn px-2 py-1 text-xs rounded hover:bg-white/10 transition">1.25x</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Panel de control -->
+    <div id="sidePanel" class="glass border-l border-white/5 p-6 space-y-6 overflow-y-auto">
+      
+      <!-- Micrófono -->
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            <span class="font-semibold text-sm">Feedback IA</span>
+          </div>
+          <button id="micBtn" onclick="toggleMic()" class="px-3 py-1 text-xs rounded-full bg-white/5 hover:bg-white/10 transition">Activar</button>
+        </div>
+        <div id="micVisualizer" class="hidden flex items-end justify-center gap-1 h-12">
+          <div class="w-1 bg-cyan-400 rounded wave-bar" style="height: 30%; animation-delay: 0s"></div>
+          <div class="w-1 bg-cyan-400 rounded wave-bar" style="height: 60%; animation-delay: 0.1s"></div>
+          <div class="w-1 bg-cyan-400 rounded wave-bar" style="height: 90%; animation-delay: 0.2s"></div>
+          <div class="w-1 bg-purple-400 rounded wave-bar" style="height: 70%; animation-delay: 0.3s"></div>
+          <div class="w-1 bg-purple-400 rounded wave-bar" style="height: 50%; animation-delay: 0.4s"></div>
+          <div class="w-1 bg-purple-400 rounded wave-bar" style="height: 80%; animation-delay: 0.5s"></div>
+          <div class="w-1 bg-cyan-400 rounded wave-bar" style="height: 40%; animation-delay: 0.6s"></div>
+          <div class="w-1 bg-cyan-400 rounded wave-bar" style="height: 65%; animation-delay: 0.7s"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">Escucha tu instrumento y te da feedback visual en tiempo real.</p>
+      </div>
+
+      <!-- Mezclador de Pistas -->
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+          <span class="font-semibold text-sm">Mezclador de Pistas</span>
+          <span class="ml-auto text-[10px] px-2 py-0.5 rounded-full gradient-bg font-bold">PRO</span>
+        </div>
+        <div class="flex justify-around items-end h-32">
+          <div class="flex flex-col items-center gap-2">
+            <input type="range" orient="vertical" class="vertical" min="0" max="100" value="80"/>
+            <span class="text-[10px] text-gray-400">🎤 Voz</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <input type="range" orient="vertical" class="vertical" min="0" max="100" value="0"/>
+            <span class="text-[10px] text-cyan-400 font-bold">🎸 Guitar</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <input type="range" orient="vertical" class="vertical" min="0" max="100" value="70"/>
+            <span class="text-[10px] text-gray-400">🎹 Keys</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <input type="range" orient="vertical" class="vertical" min="0" max="100" value="90"/>
+            <span class="text-[10px] text-gray-400">🥁 Drum</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <input type="range" orient="vertical" class="vertical" min="0" max="100" value="75"/>
+            <span class="text-[10px] text-gray-400">🎸 Bass</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3 text-center">Baja la guitarra original y toca tú esa parte.</p>
+      </div>
+
+      <!-- Dificultad Adaptativa -->
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span class="font-semibold text-sm">Dificultad Adaptativa</span>
+        </div>
+        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+          <span>Principiante</span>
+          <span id="difficultyLabel" class="font-bold text-white">Original</span>
+          <span>Avanzado</span>
+        </div>
+        <input id="difficultySlider" type="range" min="0" max="2" step="1" value="1" oninput="updateDifficulty(this.value)" class="w-full"/>
+        <div class="mt-4 p-3 bg-white/5 rounded-lg text-xs text-gray-300">
+          <span class="text-cyan-400 font-bold">Tip IA:</span> Con capo en traste 2, puedes tocar <span class="font-bold text-white">Am</span> en lugar de <span class="font-bold text-white">Bm</span>.
+        </div>
+      </div>
+
+      <!-- Capo Virtual -->
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+          <span class="font-semibold text-sm">Capo Virtual</span>
+        </div>
+        <div class="grid grid-cols-8 gap-1">
+          <button onclick="setCapo(0)" class="capo-btn py-2 rounded gradient-bg font-bold text-sm">0</button>
+          <button onclick="setCapo(1)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">1</button>
+          <button onclick="setCapo(2)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">2</button>
+          <button onclick="setCapo(3)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">3</button>
+          <button onclick="setCapo(4)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">4</button>
+          <button onclick="setCapo(5)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">5</button>
+          <button onclick="setCapo(6)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">6</button>
+          <button onclick="setCapo(7)" class="capo-btn py-2 rounded bg-white/5 hover:bg-white/10 text-sm">7</button>
+        </div>
+      </div>
+
+      <!-- Notas de comunidad -->
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span class="font-semibold text-sm">Tips de la comunidad</span>
+        </div>
+        <div class="space-y-3">
+          <div class="p-3 bg-white/5 rounded-lg text-xs">
+            <div class="flex items-center gap-2 mb-1">
+              <div class="w-6 h-6 rounded-full gradient-bg flex items-center justify-center text-[10px] font-bold">MR</div>
+              <span class="font-bold text-gray-300">Marco R.</span>
+              <span class="text-gray-600 ml-auto">hace 2d</span>
+            </div>
+            <p class="text-gray-400">El solo de guitarra empieza en 3:22. Usad escala de B menor pentatónica 🎸</p>
+          </div>
+          <div class="p-3 bg-white/5 rounded-lg text-xs">
+            <div class="flex items-center gap-2 mb-1">
+              <div class="w-6 h-6 rounded-full gradient-bg flex items-center justify-center text-[10px] font-bold">LS</div>
+              <span class="font-bold text-gray-300">Laura S.</span>
+              <span class="text-gray-600 ml-auto">hace 5d</span>
+            </div>
+            <p class="text-gray-400">Rasgueo recomendado: abajo, abajo, arriba, arriba, abajo, arriba 🔥</p>
+          </div>
+        </div>
+        <button class="w-full mt-3 py-2 text-xs text-cyan-400 hover:bg-white/5 rounded-lg transition">+ Añadir un tip</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============ NAVEGACIÓN ============
+  function showPlayer() {
+    document.getElementById('landing').classList.add('hidden-view');
+    document.getElementById('player').classList.remove('hidden-view');
+    window.scrollTo(0, 0);
+    startChordProgression();
+  }
+  function showLanding() {
+    document.getElementById('player').classList.add('hidden-view');
+    document.getElementById('landing').classList.remove('hidden-view');
+    window.scrollTo(0, 0);
+    stopChordProgression();
+  }
+
+  // ============ PROGRESIÓN DE ACORDES ============
+  const chords = [
+    { name: 'Bm', time: 0 },
+    { name: 'F#7', time: 4 },
+    { name: 'A', time: 8 },
+    { name: 'E', time: 12 },
+    { name: 'G', time: 16 },
+    { name: 'D', time: 20 },
+    { name: 'Em', time: 24 },
+    { name: 'F#7', time: 28 },
+  ];
+  
+  const simplifiedChords = [
+    { name: 'Am', time: 0 },
+    { name: 'E7', time: 4 },
+    { name: 'G', time: 8 },
+    { name: 'D', time: 12 },
+    { name: 'Em', time: 16 },
+    { name: 'C', time: 20 },
+    { name: 'Dm', time: 24 },
+    { name: 'E7', time: 28 },
+  ];
+
+  let currentChordIndex = 0;
+  let progressionInterval = null;
+  let isPlaying = false;
+  let progress = 0;
+  let progressInterval = null;
+
+  function startChordProgression() {
+    if (progressionInterval) return;
+    progressionInterval = setInterval(() => {
+      currentChordIndex = (currentChordIndex + 1) % chords.length;
+      updateChordDisplay();
+    }, 4000);
+    progressInterval = setInterval(() => {
+      progress += 0.5;
+      if (progress >= 100) progress = 0;
+      document.getElementById('progressBar').style.width = progress + '%';
+      const totalSeconds = Math.floor((progress / 100) * 390);
+      const min = Math.floor(totalSeconds / 60);
+      const sec = totalSeconds % 60;
+      document.getElementById('currentTime').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  function stopChordProgression() {
+    clearInterval(progressionInterval);
+    clearInterval(progressInterval);
+    progressionInterval = null;
+    progressInterval = null;
+  }
+
+  function updateChordDisplay() {
+    const current = document.getElementById('currentChord');
+    const difficulty = document.getElementById('difficultySlider').value;
+    const chordList = difficulty === '0' ? simplifiedChords : chords;
+    const chord = chordList[currentChordIndex];
+    
+    current.classList.remove('chord-animate');
+    void current.offsetWidth;
+    current.textContent = chord.name;
+    current.classList.add('chord-animate');
+  }
+
+  // ============ CONTROLES ============
+  function togglePlay() {
+    isPlaying = !isPlaying;
+    const icon = document.getElementById('playIcon');
+    if (isPlaying) {
+      icon.innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+    } else {
+      icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    }
+  }
+
+  function setSpeed(speed) {
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.classList.remove('gradient-bg', 'font-bold');
+      btn.classList.add('hover:bg-white/10');
+    });
+    event.target.classList.add('gradient-bg', 'font-bold');
+    event.target.classList.remove('hover:bg-white/10');
+  }
+
+  function setCapo(n) {
+    document.querySelectorAll('.capo-btn').forEach(btn => {
+      btn.classList.remove('gradient-bg', 'font-bold');
+      btn.classList.add('bg-white/5');
+    });
+    event.target.classList.add('gradient-bg', 'font-bold');
+    event.target.classList.remove('bg-white/5');
+    document.getElementById('capoDisplay').textContent = n;
+  }
+
+  function updateDifficulty(val) {
+    const labels = ['Principiante', 'Original', 'Avanzado'];
+    document.getElementById('difficultyLabel').textContent = labels[val];
+    updateChordDisplay();
+  }
+
+  function toggleMic() {
+    const btn = document.getElementById('micBtn');
+    const visualizer = document.getElementById('micVisualizer');
+    const feedback = document.getElementById('chordFeedback');
+    const glow = document.getElementById('chordGlow');
+    
+    if (btn.textContent === 'Activar') {
+      btn.textContent = 'Activo';
+      btn.classList.add('gradient-bg', 'text-white');
+      visualizer.classList.remove('hidden');
+      feedback.innerHTML = '<span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-green-400">¡Perfecto! Sigue así 🎸</span>';
+      glow.classList.add('opacity-30');
+    } else {
+      btn.textContent = 'Activar';
+      btn.classList.remove('gradient-bg', 'text-white');
+      visualizer.classList.add('hidden');
+      feedback.innerHTML = '<span class="w-2 h-2 bg-gray-500 rounded-full"></span><span class="text-gray-500">Esperando tu instrumento...</span>';
+      glow.classList.remove('opacity-30');
+    }
+  }
+
+  function toggleFocus() {
+    const video = document.querySelector('.aspect-video');
+    const panel = document.getElementById('sidePanel');
+    const topBar = document.querySelector('.sticky.top-0');
+    
+    video.classList.toggle('hidden');
+    panel.classList.toggle('hidden');
+    topBar.classList.toggle('hidden');
+  }
+</script>
+
+</body>
+</html>
